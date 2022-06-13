@@ -1,0 +1,25 @@
+- name: My playbook
+  hosts: bdsol-aci12-apic1
+  gather_facts: no
+
+  tasks:
+
+  - name: Import CSV
+    community.general.read_csv:
+      path: epgs.csv
+    register: epgs
+    delegate_to: localhost
+
+  - name: show epgs
+    debug:
+      var: epgs
+
+  - name: Create EPG
+    ansible.builtin.include_role:
+      name: create-aci-epg
+    loop: '{{ epgs.list }}'
+    vars:
+      local_tenant: '{{ item.tenant }}'
+      local_app: '{{ item.app }}'
+      local_epg: '{{ item.epg }}'
+

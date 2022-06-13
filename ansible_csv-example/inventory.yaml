@@ -1,0 +1,17 @@
+
+
+all:
+  hosts:
+    bdsol-aci12-apic1:
+      apic_host: 10.48.22.69
+    bdsol-aci12-apic2:
+      apic_host: 10.48.22.70
+    bdsol-aci12-apic3:
+      apic_host: 10.48.22.71
+    bdsol-aci51-apic1:
+      apic_host: 10.48.31.178
+  vars:
+    apic_use_proxy: no
+    apic_validate_certs: no
+    apic_username: admin
+    apic_password: ******

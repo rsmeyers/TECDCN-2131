@@ -1,0 +1,94 @@
+
+- name: Set aci_login
+  set_fact:
+    aci_login: &aci_login
+      hostname: '{{ apic_host }}'
+      username: '{{ apic_username }}'
+      password: '{{ apic_password }}'
+      use_proxy: '{{ apic_use_proxy }}'
+      validate_certs: '{{ apic_validate_certs }}'
+
+- name: Set debug msg
+  set_fact:
+    debug_msg: "{{ local_tenant }} {{ local_app }} {{ local_epg }}"
+- name: Show debug msg
+  debug:
+    var: debug_msg
+
+
+- name: Add a new tenant
+  cisco.aci.aci_tenant:
+    <<: *aci_login
+    tenant: '{{ local_tenant }}'
+  delegate_to: localhost
+  register: result
+
+- name: Add Annotations on tenant
+  cisco.aci.aci_tag:
+    <<: *aci_login
+    dn: '{{ result.mo.fvTenant.attributes.dn }}'
+    tag_type: annotation
+    tag_key: ChangeID
+    tag_value: '{{ imdb_change }}'
+    state: present
+  delegate_to: localhost
+  when: result.changed
+
+
+- name: Add a new app
+  cisco.aci.aci_ap:
+    <<: *aci_login
+    tenant: '{{ local_tenant }}'
+    ap: '{{ local_app }}'
+  delegate_to: localhost
+  register: result
+
+- name: Add Annotations on Ap
+  cisco.aci.aci_tag:
+    <<: *aci_login
+    dn: '{{ result.mo.fvAp.attributes.dn }}'
+    tag_type: annotation
+    tag_key: ChangeID
+    tag_value: '{{ imdb_change }}'
+    state: present
+  delegate_to: localhost
+  when: result.changed
+
+
+- name: Add a new epg
+  cisco.aci.aci_epg:
+    <<: *aci_login
+    tenant: '{{ local_tenant }}'
+    ap: '{{ local_app }}'
+    epg: '{{ local_epg }}'
+    description: '{{ local_epg_description }}'
+  delegate_to: localhost
+  register: result
+
+- name: Show EPG result
+  debug:
+    var: result
+
+- name: Add Annotations on EPG
+  cisco.aci.aci_tag:
+    <<: *aci_login
+    dn: '{{ result.mo.fvAEPg.attributes.dn }}'
+    tag_type: annotation
+    tag_key: ChangeID
+    tag_value: '{{ imdb_change }}'
+    state: present
+  delegate_to: localhost
+  when: result.changed
+
+
+#- name: Pickup hostvars
+#  set_fact:
+#    myVars: "{{ hostvars[inventory_hostname] | list }}"
+
+#- name: Show facts
+#  debug:
+#    var: hostvars[ansible_host][item2]
+#  loop: "{{ myVars }}"
+#  loop_control:
+#    loop_var: 'item2'
+

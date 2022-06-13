@@ -1,0 +1,39 @@
+- name: My playbook
+  hosts: bdsol-aci12-apic1
+  gather_facts: no
+
+  vars:
+    aci_login: &aci_login
+      hostname: '{{ apic_host }}'
+      username: '{{ apic_username }}'
+      password: '{{ apic_password }}'
+      use_proxy: '{{ apic_use_proxy }}'
+      validate_certs: '{{ apic_validate_certs }}'
+
+  tasks:
+  - name: Add a new tenant
+    cisco.aci.aci_tenant:
+      <<: *aci_login
+      tenant: '{{ item.tenant }}'
+    delegate_to: localhost
+    loop: '{{ epgs }}'
+
+  - name: Add a new app
+    cisco.aci.aci_ap:
+      <<: *aci_login
+      tenant: '{{ item.tenant }}'
+      ap: '{{ item.app }}'
+    delegate_to: localhost
+    loop: '{{ epgs }}'
+
+  - name: Add a new epg
+    cisco.aci.aci_epg:
+      <<: *aci_login
+      tenant: '{{ item.tenant }}'
+      ap: '{{ item.app }}'
+      epg: '{{ item.epg }}'
+    delegate_to: localhost
+    loop: '{{ epgs }}'
+
+
+
